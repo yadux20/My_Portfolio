@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta property="og:title" content="Yadunandan B C · AI/ML Engineer">
+<meta property="og:description" content="Production computer vision and LLM systems: detection, tracking, OCR, RAG.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='5' width='22' height='22' fill='none' stroke='%232B47D6' stroke-width='4'/%3E%3C/svg%3E">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Yadunandan B C</title>
+<meta name="description" content="Yadunandan B C — AI/ML Engineer building production computer vision and LLM systems.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an inspection-report sheet. Annotated hero, then sections on a two-column grid: mono label rail left, content right. */
+:root{
+  --paper:#EDF0F1;      /* steel-tinted ground */
+  --sheet:#F7F9F9;      /* raised surface */
+  --ink:#121719;
+  --muted:#55616A;
+  --rule:#C9D1D5;
+  --anno:#2B47D6;       /* annotation blue: boxes, links */
+  --hit:#A35C00;        /* detection amber: metrics, faults */
+  --hit-bg:#F3E5CB;
+  --ok:#1F7A4D;
+  --display:"Archivo", "Arial Narrow", Arial, sans-serif;
+  --body:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --step--1:.8125rem; --step-0:1rem; --step-1:1.25rem; --step-2:1.75rem; --step-3:clamp(2rem,4.4vw,2.6rem);
+  --step-4:clamp(3rem, 9.5vw, 7.5rem);
+  --wrap:1140px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1214; --sheet:#151B1E; --ink:#E6ECEE; --muted:#93A1A8; --rule:#2A3439;
+  --anno:#8EA2FF; --hit:#F2B44A; --hit-bg:#2E2412; --ok:#5CD39A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0E1214; --sheet:#151B1E; --ink:#E6ECEE; --muted:#93A1A8; --rule:#2A3439;
+  --anno:#8EA2FF; --hit:#F2B44A; --hit-bg:#2E2412; --ok:#5CD39A; color-scheme:dark }
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:var(--step-0);line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+.heroband{background-image:linear-gradient(color-mix(in srgb, var(--rule) 60%, transparent) 1px, transparent 1px),linear-gradient(90deg,color-mix(in srgb, var(--rule) 60%, transparent) 1px, transparent 1px);
+  background-size:48px 48px;background-position:center -1px;
+  -webkit-mask-image:linear-gradient(#000 55%, transparent);mask-image:linear-gradient(#000 55%, transparent)}
+.herowrap{position:relative}
+.herowrap > .heroband{position:absolute;inset:0;pointer-events:none}
+.herowrap > .hero{position:relative}
+a{color:var(--anno);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--anno);outline-offset:3px;border-radius:2px}
+::selection{background:var(--anno);color:var(--paper)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.05}
+p{margin:0}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+.mono{font-family:var(--mono);font-size:var(--step--1);letter-spacing:.02em}
+.label{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+
+/* ── top bar ── */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb, var(--paper) 86%, transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
+.bar .id{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-stretch:115%;letter-spacing:.02em;text-transform:uppercase;font-size:.88rem;color:var(--ink);text-decoration:none}
+.bar .id i{width:14px;height:14px;border:2px solid var(--anno);display:inline-block}
+.bar nav{display:flex;gap:4px;flex-wrap:wrap}
+.bar nav a{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);text-decoration:none;padding:6px 10px;border:1px solid transparent}
+.bar nav a:hover{color:var(--ink)}
+.bar nav a[aria-current="true"]{color:var(--anno);border-color:var(--anno)}
+@media (max-width:680px){.bar nav a.opt{display:none}}
+
+/* ── hero ── */
+.hero{padding-block:clamp(56px,9vw,120px) clamp(44px,7vw,88px)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:36px}
+.now{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.78rem;color:var(--muted);letter-spacing:.02em}
+.now b{font-weight:500;color:var(--ink)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent)}
+.frame{position:relative;display:inline-block;justify-self:start;padding:clamp(14px,2.2vw,26px) clamp(16px,2.6vw,32px);max-width:100%;overflow:visible}
+.frame .box{position:absolute;inset:0;border:2px solid var(--anno);pointer-events:none}
+.frame .box i{position:absolute;width:11px;height:11px;background:var(--paper);border:2px solid var(--anno)}
+.frame .box i:nth-child(1){top:-6px;left:-6px}.frame .box i:nth-child(2){top:-6px;right:-6px}
+.frame .box i:nth-child(3){bottom:-6px;left:-6px}.frame .box i:nth-child(4){bottom:-6px;right:-6px}
+.frame .scan{position:absolute;left:0;right:0;top:0;height:2px;background:var(--anno);opacity:0;pointer-events:none}
+.tag{position:absolute;left:-2px;top:0;transform:translateY(-100%);background:var(--anno);color:var(--paper);
+  font-family:var(--mono);font-size:.72rem;padding:3px 8px;letter-spacing:.04em;white-space:nowrap}
+.coords{position:absolute;right:-2px;bottom:0;transform:translateY(100%);font-family:var(--mono);font-size:.68rem;color:var(--muted);padding-top:6px;white-space:nowrap}
+.hero h1{font-size:var(--step-4);font-weight:800;font-stretch:70%;text-transform:uppercase;letter-spacing:-.01em;line-height:.88}
+.hero h1 span{display:block}
+.hero h1 .alt{font-stretch:125%;font-weight:500;font-size:.36em;letter-spacing:.03em;margin-top:.35em;color:var(--muted);line-height:1.1}
+.lede{max-width:60ch;font-size:clamp(1.1rem,1.9vw,1.3rem);line-height:1.55}
+.lede em{font-style:normal;background:linear-gradient(transparent 62%, var(--hit-bg) 62%)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:1.5px solid var(--ink);color:var(--ink);
+  text-decoration:none;font-family:var(--mono);font-size:.8rem;letter-spacing:.04em;background:transparent;cursor:pointer;
+  transition:background-color .15s, color .15s, border-color .15s}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.primary:hover{background:var(--anno);border-color:var(--anno)}
+.hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1.5px solid var(--ink);border-bottom:1px solid var(--rule)}
+.hud div{padding:16px 12px 16px 0;display:grid;gap:4px;align-content:start}
+.hud div + div{padding-left:18px;border-left:1px solid var(--rule)}
+.hud b{font-family:var(--display);font-stretch:82%;font-weight:700;font-size:clamp(1.8rem,3.6vw,2.4rem);line-height:1;font-variant-numeric:tabular-nums}
+.hud b small{font-size:.48em;font-weight:500;color:var(--muted);margin-left:3px}
+.hud .sub{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+@media (max-width:680px){.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.hud div:nth-child(3){padding-left:0;border-left:0}
+  .hud div:nth-child(n+3){border-top:1px solid var(--rule)}}
+
+@media (prefers-reduced-motion:no-preference){
+  .frame .box{animation:lock 900ms var(--ease) both}
+  .tag{animation:pop 400ms 650ms ease-out both}
+  .coords{animation:fade 500ms 800ms ease-out both}
+  .frame .scan{animation:scan 1100ms 150ms ease-in-out 1}
+  .dot{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes lock{from{inset:-20px -28px;opacity:.35}to{inset:0;opacity:1}}
+  @keyframes pop{from{opacity:.4;transform:translateY(-75%)}to{opacity:1;transform:translateY(-100%)}}
+  @keyframes fade{from{opacity:.3}to{opacity:1}}
+  @keyframes scan{0%{top:0;opacity:0}10%{opacity:.55}90%{opacity:.55}100%{top:100%;opacity:0}}
+  @keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb, var(--ok) 0%, transparent)}}
+}
+
+/* ── sections ── */
+section{border-top:1px solid var(--rule)}
+.sec{display:grid;grid-template-columns:210px minmax(0,1fr);gap:28px 52px;padding-block:clamp(52px,7vw,92px)}
+.sec > header{display:grid;gap:10px;align-content:start}
+.sec > header h2{font-size:var(--step-2);font-weight:700;font-stretch:88%;text-transform:uppercase;letter-spacing:.01em}
+.sec > header p{color:var(--muted);font-size:.92rem;max-width:28ch}
+@media (min-width:821px){.sec > header{position:sticky;top:96px;align-self:start}}
+@media (max-width:820px){.sec{grid-template-columns:minmax(0,1fr)}}
+
+/* process */
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;list-style:none;margin:0;padding:0;counter-reset:s}
+.flow li{counter-increment:s;padding:0 18px 0 0;display:grid;gap:8px;align-content:start;position:relative}
+.flow li + li{padding-left:18px;border-left:1px dashed var(--rule)}
+.flow li::before{content:"0" counter(s);font-family:var(--mono);font-size:.72rem;color:var(--anno);letter-spacing:.1em}
+.flow h3{font-size:1.1rem;font-weight:700;font-stretch:95%}
+.flow p{color:var(--muted);font-size:.92rem}
+@media (max-width:760px){.flow{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:24px}.flow li:nth-child(3){padding-left:0;border-left:0}}
+@media (max-width:420px){.flow{grid-template-columns:minmax(0,1fr)}.flow li,.flow li + li{padding-left:0;border-left:0}}
+
+/* experience timeline */
+.roles{display:grid}
+.role{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px 28px;padding-block:26px;border-bottom:1px solid var(--rule)}
+.role:first-child{padding-top:0}
+.role:last-child{border-bottom:0;padding-bottom:0}
+.role .when{font-family:var(--mono);font-size:var(--step--1);color:var(--muted);font-variant-numeric:tabular-nums;padding-top:4px}
+.role h3{font-size:var(--step-1);font-weight:700;font-stretch:100%}
+.role .org{color:var(--muted);font-size:.95rem;margin-top:2px}
+.role ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:68ch}
+.role li{position:relative;padding-left:22px}
+.role li::before{content:"";position:absolute;left:0;top:.6em;width:9px;height:9px;border:1.5px solid var(--anno)}
+@media (max-width:560px){.role{grid-template-columns:minmax(0,1fr)}}
+
+/* project index */
+.index{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule);background:var(--sheet);margin-bottom:64px}
+.index a{display:grid;gap:4px;padding:14px 16px;text-decoration:none;color:var(--ink);border-left:1px solid var(--rule);transition:background-color .15s}
+.index a:first-child{border-left:0}
+.index a:hover{background:var(--paper)}
+.index a span:last-child{font-weight:600;font-size:.95rem;line-height:1.3}
+.index a:hover span:last-child{color:var(--anno)}
+@media (max-width:760px){.index{grid-template-columns:repeat(2,minmax(0,1fr))}.index a:nth-child(3){border-left:0}.index a:nth-child(n+3){border-top:1px solid var(--rule)}}
+
+/* projects */
+.projects{display:grid;gap:80px}
+.proj{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px 44px;align-items:start}
+.proj:nth-child(even) .fig{order:-1}
+@media (max-width:960px){.proj{grid-template-columns:minmax(0,1fr)}.proj:nth-child(even) .fig{order:0}}
+.proj h3{font-size:var(--step-3);font-weight:800;font-stretch:76%;text-transform:uppercase;line-height:.95;letter-spacing:-.005em}
+.proj .kind{margin-bottom:12px;display:flex;gap:10px;align-items:center}
+.proj .kind::before{content:"";width:18px;height:1.5px;background:var(--anno)}
+.proj p.desc{margin-top:14px;max-width:58ch;font-size:1.05rem}
+.proj ul{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:8px;max-width:62ch;color:var(--muted)}
+.proj li{padding-left:22px;position:relative}
+.proj li::before{content:"→";position:absolute;left:0;color:var(--anno);font-family:var(--mono);font-size:.85em;top:.1em}
+.stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.chip{font-family:var(--mono);font-size:.72rem;padding:3px 8px;border:1px solid var(--rule);color:var(--muted);background:var(--sheet)}
+.metrics{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.metric{display:grid;padding:8px 14px 8px 12px;background:var(--hit-bg);border-left:3px solid var(--hit)}
+.metric b{font-family:var(--display);font-stretch:85%;font-size:1.35rem;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.metric span{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.04em}
+.proj .more{margin-top:20px;display:inline-block;font-family:var(--mono);font-size:.8rem}
+
+.fig{margin:0;background:var(--sheet);border:1px solid var(--rule);padding:18px 18px 14px;position:relative}
+.fig::before,.fig::after{content:"";position:absolute;width:10px;height:10px;border-color:var(--ink);border-style:solid}
+.fig::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.fig::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.fig figcaption{margin-top:14px;padding-top:10px;border-top:1px dashed var(--rule)}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig .ink{stroke:var(--ink)}.fig .mut{stroke:var(--muted)}.fig .an{stroke:var(--anno)}.fig .hi{stroke:var(--hit)}.fig .rl{stroke:var(--rule)}
+.fig .fink{fill:var(--ink)}.fig .fmut{fill:var(--muted)}.fig .fan{fill:var(--anno)}.fig .fhi{fill:var(--hit)}.fig .fok{fill:var(--ok)}
+.fig .fpaper{fill:var(--paper)}.fig .fsheet{fill:var(--sheet)}.fig .frule{fill:var(--rule)}.fig .fhibg{fill:var(--hit-bg)}
+.fig text{font-family:var(--mono);font-size:11px}
+
+/* latency bars */
+.lat{display:grid;gap:10px;margin-top:10px}
+.lat .row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:12px;align-items:center}
+.lat .track{height:22px;background:var(--paper)}
+.lat .fill{height:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;
+  font-family:var(--mono);font-size:.72rem;color:var(--paper);font-variant-numeric:tabular-nums}
+.lat .cold{background:var(--muted)}.lat .warm{background:var(--hit)}
+@media (prefers-reduced-motion:no-preference){.lat .fill{transform-origin:left;animation:grow 900ms var(--ease) both}}
+@keyframes grow{from{transform:scaleX(.6)}to{transform:scaleX(1)}}
+
+/* archive */
+.archive{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--rule)}
+.archive a{display:grid;gap:6px;padding:20px 20px 20px 0;border-bottom:1px solid var(--rule);text-decoration:none;color:var(--ink)}
+.archive a:nth-child(even){padding-left:20px;border-left:1px solid var(--rule)}
+.archive a:hover h3{color:var(--anno)}
+.archive h3{font-size:1.05rem;font-weight:700;font-stretch:100%;display:flex;justify-content:space-between;gap:12px}
+.archive h3 span{font-family:var(--mono);font-weight:400;font-size:.75rem;color:var(--muted);white-space:nowrap}
+.archive p{color:var(--muted);font-size:.92rem}
+@media (max-width:640px){.archive{grid-template-columns:minmax(0,1fr)}.archive a:nth-child(even){padding-left:0;border-left:0}}
+
+/* skills */
+.skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 40px}
+.skills div{display:grid;gap:10px;align-content:start}
+.skills .list{display:flex;flex-wrap:wrap;gap:6px}
+.skills .chip{font-size:.78rem;color:var(--ink);padding:5px 10px}
+@media (max-width:640px){.skills{grid-template-columns:minmax(0,1fr)}}
+
+.edu{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 24px;align-items:end}
+.edu h3{font-size:var(--step-1);font-weight:700}
+.edu .gpa{text-align:right}
+.edu .gpa b{font-family:var(--display);font-stretch:78%;font-size:clamp(2.4rem,5vw,3.2rem);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.edu{grid-template-columns:minmax(0,1fr)}.edu .gpa{text-align:left}}
+
+/* contact */
+.contact{background:var(--ink);color:var(--paper);border-top:0}
+.contact .wrap{padding-block:clamp(60px,8vw,108px);display:grid;gap:28px}
+.contact h2{font-size:clamp(2.3rem,6.8vw,5.2rem);font-weight:800;font-stretch:70%;text-transform:uppercase;line-height:.9}
+.contact .label{color:color-mix(in srgb, var(--paper) 62%, var(--ink))}
+.contact p{max-width:56ch;color:color-mix(in srgb, var(--paper) 82%, var(--ink))}
+.mailrow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+.mailrow .addr{font-family:var(--mono);font-size:clamp(1rem,2.6vw,1.35rem);user-select:all;padding:10px 14px;border:1.5px solid color-mix(in srgb, var(--paper) 40%, var(--ink));word-break:break-all;display:flex;align-items:center}
+.contact .btn{border-color:var(--paper);color:var(--paper)}
+.contact .btn:hover{background:var(--paper);color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:10px}
+.contact :focus-visible{outline-color:var(--paper)}
+footer{background:var(--ink);color:color-mix(in srgb, var(--paper) 55%, var(--ink));border-top:1px solid color-mix(in srgb, var(--paper) 16%, var(--ink))}
+footer .wrap{padding-block:18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="wrap">
+    <a class="id" href="#top"><i aria-hidden="true"></i>Yadunandan B C</a>
+    <nav aria-label="Sections">
+      <a class="opt" href="#approach">Approach</a>
+      <a class="opt" href="#experience">Experience</a>
+      <a href="#work">Work</a>
+      <a class="opt" href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</div>
+
+<main id="top">
+ <div class="herowrap">
+  <div class="heroband" aria-hidden="true"></div>
+  <div class="hero wrap">
+    <div class="hero-grid">
+      <span class="now"><span class="dot" aria-hidden="true"></span><span>Currently <b>AI/ML Engineer at IndusVision</b></span></span>
+      <div class="frame">
+        <div class="box" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="scan" aria-hidden="true"></div>
+        <span class="tag" aria-hidden="true">ml_engineer&nbsp; 0.98</span>
+        <span class="coords" aria-hidden="true">track_id 01 · cv + genai</span>
+        <h1><span>Yadunandan</span><span>B C</span><span class="alt">AI / ML Engineer · Bengaluru</span></h1>
+      </div>
+      <p class="lede">I build computer vision systems that run on factory floors: <em>detection, segmentation, tracking and OCR</em> for industrial inspection and line monitoring. Alongside that I build LLM applications with RAG, LangChain and FastAPI.</p>
+      <div class="hero-meta">
+        <a class="btn primary" href="#work">See selected work ↓</a>
+        <a class="btn" href="https://github.com/yadux20" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="btn" href="https://www.linkedin.com/in/yadunandan-b-c" target="_blank" rel="noopener">LinkedIn ↗</a>
+      </div>
+      <div class="hud" aria-label="Benchmarks from recent projects">
+        <div><span class="label">Throughput</span><b>15<small>FPS</small></b><span class="sub">ANPR, per stream</span></div>
+        <div><span class="label">Streams</span><b>4<small>cams</small></b><span class="sub">concurrent, one GPU</span></div>
+        <div><span class="label">Latency</span><b>30<small>ms</small></b><span class="sub">end-to-end inference</span></div>
+        <div><span class="label">RAG speed-up</span><b>2.3<small>×</small></b><span class="sub">5.9s → 2.6s cached</span></div>
+      </div>
+    </div>
+  </div>
+ </div>
+
+  <section id="approach">
+    <div class="wrap sec">
+      <header><span class="label">Approach</span><h2>POC to production</h2><p>How a vision project moves from a plant visit to a model running on the line.</p></header>
+      <ol class="flow">
+        <li><h3>Frame the problem</h3><p>Define the defect or event with the plant team and agree on what a correct catch looks like.</p></li>
+        <li><h3>Build the data</h3><p>Collect, annotate and balance images from the real line, then engineer the features that matter.</p></li>
+        <li><h3>Train &amp; evaluate</h3><p>Benchmark detection, segmentation or tracking models against the agreed metric before anything ships.</p></li>
+        <li><h3>Deploy &amp; monitor</h3><p>Integrate on site, then watch accuracy, latency and drift so the model keeps up with the line.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="wrap sec">
+      <header><span class="label">Experience</span><h2>Where I've shipped</h2></header>
+      <div class="roles">
+        <article class="role">
+          <div class="when">Jul 2025 – now</div>
+          <div>
+            <h3>AI/ML Engineer</h3>
+            <div class="org">IndusVision</div>
+            <ul>
+              <li>Develop and deploy computer vision models for detection, segmentation, tracking and OCR in production visual-inspection systems.</li>
+              <li>Built anomaly detection pipelines that flag abnormal production events from live image streams.</li>
+              <li>Lead POCs end to end: problem definition, dataset preparation, feature engineering, training, evaluation and on-site integration.</li>
+              <li>Designed monitoring pipelines that track model accuracy, inference latency and production drift.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="role">
+          <div class="when">Dec 2024 – Jun 2025</div>
+          <div>
+            <h3>AI/ML &amp; Computer Vision Intern</h3>
+            <div class="org">IndusVision</div>
+            <ul>
+              <li>Implemented and evaluated image segmentation and object tracking models for industrial visual intelligence.</li>
+              <li>Prepared and annotated datasets and benchmarked model performance across multiple POCs.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="wrap sec">
+      <header><span class="label">Selected work</span><h2>Projects</h2><p>Four builds across LLM retrieval, real-time video and factory automation.</p></header>
+      <div>
+        <nav class="index" aria-label="Project index">
+          <a href="#p-copilot"><span class="label">Generative AI</span><span>YouTube Copilot</span></a>
+          <a href="#p-anpr"><span class="label">Real-time CV</span><span>Multi-camera ANPR</span></a>
+          <a href="#p-jam"><span class="label">Automation</span><span>Conveyor jam recovery</span></a>
+          <a href="#p-gear"><span class="label">Metrology</span><span>Gear inspection</span></a>
+        </nav>
+        <div class="projects">
+
+          <article class="proj" id="p-copilot">
+            <div>
+              <div class="label kind">Generative AI · Chrome extension</div>
+              <h3>YouTube Copilot</h3>
+              <p class="desc">Ask questions about the video you're watching and get answers grounded in what was actually said, with timestamps.</p>
+              <ul>
+                <li>Manifest V3 extension talking to a Dockerized FastAPI backend, built on LangChain and the Gemini API.</li>
+                <li>Hybrid RAG: transcript chunking, Gemini embeddings and in-memory vector search, with timestamp-aware retrieval.</li>
+                <li>Per-session conversational memory plus a video-level transcript and embedding cache.</li>
+              </ul>
+              <div class="metrics">
+                <div class="metric"><b>2.3×</b><span>faster repeat queries</span></div>
+                <div class="metric"><b>2.6s</b><span>avg cached response</span></div>
+              </div>
+              <div class="stack"><span class="chip">LangChain</span><span class="chip">Gemini</span><span class="chip">FastAPI</span><span class="chip">RAG</span><span class="chip">Docker</span><span class="chip">Chrome MV3</span></div>
+              <a class="more" href="https://github.com/yadux20/Youtube_Copilot" target="_blank" rel="noopener">View repository ↗</a>
+            </div>
+            <figure class="fig">
+              <svg viewBox="0 0 360 200" role="img" aria-label="Pipeline: transcript to chunks to embeddings to retriever to Gemini answer, with a cache shortcut">
+                <g fill="none" stroke-width="1.5">
+                  <rect class="mut" x="8" y="24" width="96" height="34"/>
+                  <rect class="mut" x="132" y="24" width="96" height="34"/>
+                  <rect class="mut" x="256" y="24" width="96" height="34"/>
+                  <rect class="an" x="132" y="118" width="96" height="34"/>
+                  <rect class="ink" x="256" y="118" width="96" height="34" stroke-width="2"/>
+                  <path class="mut" d="M104 41h22M228 41h22M304 58v54M256 135h-22"/>
+                  <path class="hi" d="M56 58v77h70" stroke-dasharray="4 4"/>
+                </g>
+                <g class="fmut"><path d="M126 37l6 4-6 4zM250 37l6 4-6 4zM300 112l4 6 4-6zM234 131l-6 4 6 4z"/></g>
+                <path class="fhi" d="M126 131l6 4-6 4z"/>
+                <text class="fink" x="56" y="45" text-anchor="middle">transcript</text>
+                <text class="fink" x="180" y="45" text-anchor="middle">chunk + ts</text>
+                <text class="fink" x="304" y="45" text-anchor="middle">embed</text>
+                <text class="fan" x="180" y="139" text-anchor="middle">retrieve</text>
+                <text class="fink" x="304" y="139" text-anchor="middle">Gemini</text>
+                <text class="fhi" x="62" y="104">cache hit</text>
+                <text class="fmut" x="8" y="186">session memory → prompt context</text>
+              </svg>
+              <div class="lat" aria-label="Average response latency">
+                <div class="row"><span class="mono">first ask</span><div class="track"><div class="fill cold" style="width:100%">5.9s</div></div></div>
+                <div class="row"><span class="mono">repeat ask</span><div class="track"><div class="fill warm" style="width:44%">2.6s</div></div></div>
+              </div>
+              <figcaption class="label">Fig. 1 · Retrieval path and cached latency</figcaption>
+            </figure>
+          </article>
+
+          <article class="proj" id="p-anpr">
+            <div>
+              <div class="label kind">Computer vision · Real-time</div>
+              <h3>Multi-camera ANPR</h3>
+              <p class="desc">Automated licence-plate detection and recognition running live across several camera feeds on a single GPU.</p>
+              <ul>
+                <li>YOLO-based plate detection followed by OCR, all on GPU.</li>
+                <li>Shared GPU pipelines and asynchronous processing across streams instead of one model per camera.</li>
+                <li>Removed redundant inference calls to raise overall throughput.</li>
+              </ul>
+              <div class="metrics">
+                <div class="metric"><b>15 FPS</b><span>× 4 streams</span></div>
+                <div class="metric"><b>30 ms</b><span>end-to-end latency</span></div>
+                <div class="metric"><b>−80%</b><span>redundant inference</span></div>
+              </div>
+              <div class="stack"><span class="chip">YOLO</span><span class="chip">OCR</span><span class="chip">PyTorch</span><span class="chip">asyncio</span><span class="chip">CUDA</span></div>
+            </div>
+            <figure class="fig">
+              <svg id="anpr" viewBox="0 0 360 230" role="img" aria-label="Four camera feeds, each with a detected licence plate box and recognised text"></svg>
+              <figcaption class="label">Fig. 2 · Four feeds, one shared GPU pipeline (illustrative plates)</figcaption>
+            </figure>
+          </article>
+
+          <article class="proj" id="p-jam">
+            <div>
+              <div class="label kind">Computer vision · Industrial automation</div>
+              <h3>Conveyor jam detection &amp; recovery</h3>
+              <p class="desc">A vision system that spots a jammed conveyor as it happens and brings the line back up once the fault is cleared.</p>
+              <ul>
+                <li>Detects jams in real time by monitoring regions of the belt and analysing motion inside each one.</li>
+                <li>Automated recovery logic wired to PLC signals resumes operation after the fault is cleared.</li>
+                <li>Condition-based detection and control improved process reliability and cut downtime.</li>
+              </ul>
+              <div class="metrics">
+                <div class="metric"><b>PLC</b><span>integrated control loop</span></div>
+                <div class="metric"><b>Auto</b><span>resume after clearance</span></div>
+              </div>
+              <div class="stack"><span class="chip">OpenCV</span><span class="chip">Motion analysis</span><span class="chip">ROI monitoring</span><span class="chip">PLC I/O</span><span class="chip">Python</span></div>
+            </div>
+            <figure class="fig">
+              <svg id="conveyor" viewBox="0 0 360 262" role="img" aria-label="Conveyor with three monitored regions; motion in region two drops below threshold, triggering a jam, a PLC stop, then automatic resume"></svg>
+              <figcaption class="label">Fig. 3 · Region motion → jam flag → PLC stop → auto-resume (schematic)</figcaption>
+            </figure>
+          </article>
+
+          <article class="proj" id="p-gear">
+            <div>
+              <div class="label kind">Image processing · Metrology</div>
+              <h3>Gear inspection</h3>
+              <p class="desc">An image-processing pipeline that finds surface defects on gears and measures them against spec.</p>
+              <ul>
+                <li>Detects cracks, scratches and dents on the gear surface.</li>
+                <li>Preprocessing and filtering stages tuned to sharpen edges and lift detection accuracy.</li>
+                <li>Computes diameter, teeth count and spline geometry from the image.</li>
+              </ul>
+              <div class="stack"><span class="chip">OpenCV</span><span class="chip">Python</span><span class="chip">Contour analysis</span><span class="chip">Defect detection</span></div>
+            </div>
+            <figure class="fig">
+              <svg id="gear" viewBox="0 0 360 260" role="img" aria-label="Gear outline with diameter measurement, tooth count and a flagged crack"></svg>
+              <figcaption class="label">Fig. 4 · Dimensional check and defect flag (schematic)</figcaption>
+            </figure>
+          </article>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="archive">
+    <div class="wrap sec">
+      <header><span class="label">From GitHub</span><h2>More repos</h2><p>Earlier ML and data projects.</p></header>
+      <div class="archive">
+        <a href="https://github.com/yadux20/Privify-AI" target="_blank" rel="noopener"><h3>Privify-AI <span>Python ↗</span></h3><p>A privacy-first face recognition application that protects user data without giving up performance.</p></a>
+        <a href="https://github.com/yadux20/Telescope-Spectrum-Classification" target="_blank" rel="noopener"><h3>Telescope Spectrum Classification <span>ML ↗</span></h3><p>Separating gamma-ray signals from background in Cherenkov telescope light patterns.</p></a>
+        <a href="https://github.com/yadux20/DiabetesPredection" target="_blank" rel="noopener"><h3>Diabetes Prediction <span>ML ↗</span></h3><p>Predicting diabetes from patient data with a Naive Bayes classifier.</p></a>
+        <a href="https://github.com/yadux20/Amazon_fresh-Database" target="_blank" rel="noopener"><h3>Amazon Fresh Database <span>SQL ↗</span></h3><p>A grocery database covering inventory, suppliers, sales and customer transactions.</p></a>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap sec">
+      <header><span class="label">Toolkit</span><h2>Skills</h2></header>
+      <div class="skills">
+        <div><span class="label">Computer vision &amp; ML</span><div class="list"><span class="chip">PyTorch</span><span class="chip">OpenCV</span><span class="chip">Ultralytics YOLO</span><span class="chip">Segmentation</span><span class="chip">Tracking</span><span class="chip">OCR</span><span class="chip">Anomaly detection</span><span class="chip">Motion analysis</span><span class="chip">scikit-learn</span></div></div>
+        <div><span class="label">Generative AI / LLM</span><div class="list"><span class="chip">LangChain</span><span class="chip">RAG</span><span class="chip">Prompt engineering</span><span class="chip">AI agents</span><span class="chip">Guardrails</span><span class="chip">Hugging Face</span><span class="chip">Gemini API</span><span class="chip">Model evaluation</span></div></div>
+        <div><span class="label">Production &amp; integration</span><div class="list"><span class="chip">FastAPI</span><span class="chip">Docker</span><span class="chip">Inference optimisation</span><span class="chip">Drift monitoring</span><span class="chip">PLC integration</span><span class="chip">Roboflow</span><span class="chip">Git</span></div></div>
+        <div><span class="label">Languages</span><div class="list"><span class="chip">Python</span><span class="chip">C</span><span class="chip">SQL</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="wrap sec">
+      <header><span class="label">Education</span><h2>Degree</h2></header>
+      <div class="edu">
+        <div>
+          <h3>B.E. in Artificial Intelligence &amp; Machine Learning</h3>
+          <p style="color:var(--muted);margin-top:4px">Visvesvaraya Technological University, Bengaluru · Dec 2021 – May 2025</p>
+        </div>
+        <div class="gpa"><span class="label">CGPA</span><br><b>8.43</b><span class="mono" style="color:var(--muted)"> / 10</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <span class="label">Contact</span>
+    <h2>Have a vision problem<br>or an LLM idea?</h2>
+    <p>I'm open to AI/ML and computer vision roles, Generative AI projects and research collaborations. Email is the fastest way to reach me.</p>
+    <div class="mailrow">
+      <span class="addr" id="addr">yadunandanbc@gmail.com</span>
+      <button class="btn" id="copy" type="button">Copy email</button>
+    </div>
+    <div class="links">
+      <a class="btn" href="https://github.com/yadux20" target="_blank" rel="noopener">github.com/yadux20 ↗</a>
+      <a class="btn" href="https://www.linkedin.com/in/yadunandan-b-c" target="_blank" rel="noopener">linkedin.com/in/yadunandan-b-c ↗</a>
+    </div>
+  </div>
+</section>
+<footer><div class="wrap mono"><span>Yadunandan B C · Bengaluru, India</span><a href="#top">Back to top ↑</a></div></footer>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent, text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text)e.textContent=text;parent.appendChild(e);return e;}
+
+  // Fig 2 — four camera tiles
+  var a=document.getElementById("anpr");
+  var plates=["KA 01 AB 4821","KA 05 MQ 1193","KA 51 HX 0077","KA 03 NC 6640"];
+  var conf=["0.97","0.95","0.96","0.94"];
+  for(var i=0;i<4;i++){
+    var x=8+(i%2)*176, y=8+Math.floor(i/2)*110, w=168, h=102;
+    el("rect",{x:x,y:y,width:w,height:h,class:"fpaper"},a);
+    el("path",{d:"M"+(x+20)+" "+(y+h)+"L"+(x+70)+" "+(y+20)+"M"+(x+w-20)+" "+(y+h)+"L"+(x+w-70)+" "+(y+20),class:"mut",fill:"none","stroke-width":"1","stroke-dasharray":"3 5"},a);
+    el("rect",{x:x+42,y:y+30,width:84,height:58,rx:8,class:"frule"},a);
+    el("rect",{x:x+52,y:y+36,width:64,height:18,rx:3,class:"fsheet"},a);
+    el("rect",{x:x+58,y:y+66,width:52,height:12,class:"fsheet"},a);
+    el("rect",{x:x+55,y:y+63,width:58,height:18,fill:"none",class:"an","stroke-width":"1.6"},a);
+    el("rect",{x:x+55,y:y+50,width:58,height:13,class:"fan"},a);
+    el("text",{x:x+58,y:y+60,class:"fpaper","font-size":"8.5"},a,"plate "+conf[i]);
+    el("text",{x:x+6,y:y+14,class:"fmut","font-size":"9"},a,"CAM "+(i+1));
+    el("text",{x:x+6,y:y+h-6,class:"fink","font-size":"9.5"},a,plates[i]);
+    el("text",{x:x+w-6,y:y+14,class:"fhi","font-size":"9","text-anchor":"end"},a,"15fps");
+  }
+
+  // Fig 3 — conveyor jam
+  var c=document.getElementById("conveyor");
+  var top=50, bot=92, L=34, R=326, rr=(bot-top)/2, my=(top+bot)/2;
+  el("path",{d:"M"+L+" "+top+"H"+R+"M"+L+" "+bot+"H"+R,class:"ink",fill:"none","stroke-width":"1.6"},c);
+  [L,R].forEach(function(cx){el("circle",{cx:cx,cy:my,r:rr,fill:"none",class:"ink","stroke-width":"1.6"},c);el("circle",{cx:cx,cy:my,r:3,class:"fink"},c);});
+  for(var s=L+14;s<R;s+=18){el("path",{d:"M"+s+" "+(bot+0)+"v-4",class:"mut","stroke-width":"1"},c);}
+  // ROIs
+  var rois=[[46,128,"roi_1","flow ok",false],[146,246,"roi_2","no motion",true],[262,318,"roi_3","starved",false]];
+  rois.forEach(function(r){
+    el("rect",{x:r[0],y:top-34,width:r[1]-r[0],height:bot-top+40,fill:"none",class:r[4]?"hi":"an","stroke-width":r[4]?"2":"1.2","stroke-dasharray":r[4]?"":"4 3"},c);
+    if(r[4]){el("rect",{x:r[0]-1,y:top-48,width:72,height:14,class:"fhi"},c);el("text",{x:r[0]+4,y:top-38,class:"fpaper","font-size":"9.5"},c,r[2]+" · JAM");}
+    else{el("text",{x:r[0],y:top-38,class:"fan","font-size":"9.5"},c,r[2]);}
+    el("text",{x:r[0]+3,y:bot+16,class:r[4]?"fhi":"fmut","font-size":"9"},c,r[3]);
+  });
+  // cartons
+  [[56,22,18],[96,24,20]].forEach(function(b){el("rect",{x:b[0],y:top-b[2],width:b[1],height:b[2],class:"frule"},c);el("rect",{x:b[0],y:top-b[2],width:b[1],height:b[2],fill:"none",class:"mut","stroke-width":"1"},c);});
+  [[158,24,18,0],[180,26,22,0],[204,22,16,0],[170,24,16,-14],[194,22,15,10],[220,20,18,0]].forEach(function(b){
+    var yb=top-b[2]-(b[3]?16:0);
+    el("rect",{x:b[0],y:yb,width:b[1],height:b[2],class:"fhibg",stroke:"var(--hit)","stroke-width":"1",transform:"rotate("+b[3]+" "+(b[0]+b[1]/2)+" "+(yb+b[2]/2)+")"},c);
+  });
+  // motion trace for roi_2
+  var px0=34, px1=326, py0=132, py1=184, thr=0.25;
+  var vals=[.82,.78,.86,.8,.84,.76,.83,.79,.85,.81,.77,.84,.62,.31,.12,.06,.05,.07,.04,.06,.05,.08,.38,.7,.82,.79,.85,.8,.83,.81];
+  function X(i){return px0+i/(vals.length-1)*(px1-px0);} function Y(v){return py1-v*(py1-py0);}
+  var jx0=X(13.6), jx1=X(21.6);
+  el("rect",{x:jx0,y:py0-6,width:jx1-jx0,height:py1-py0+6,class:"fhibg"},c);
+  el("path",{d:"M"+px0+" "+py1+"H"+px1,class:"rl",fill:"none","stroke-width":"1"},c);
+  el("path",{d:"M"+px0+" "+Y(thr)+"H"+px1,class:"hi",fill:"none","stroke-width":"1","stroke-dasharray":"3 3"},c);
+  el("text",{x:px1,y:Y(thr)-4,class:"fhi","font-size":"9","text-anchor":"end"},c,"threshold");
+  var d="";vals.forEach(function(v,i){d+=(i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);});
+  el("path",{d:d,class:"an",fill:"none","stroke-width":"1.8","stroke-linejoin":"round"},c);
+  el("text",{x:px0,y:py0-8,class:"fmut","font-size":"9"},c,"motion energy · roi_2");
+  // state strip
+  var sy=200, sh=18, xs=[px0,jx0,X(17),jx1,px1];
+  var st=[["RUN","frule","fink"],["JAM","fhi","fpaper"],["STOP","fink","fpaper"],["RESUME","fan","fpaper"]];
+  st.forEach(function(sg,i){
+    el("rect",{x:xs[i],y:sy,width:xs[i+1]-xs[i]-1,height:sh,class:sg[1]},c);
+    var wseg=xs[i+1]-xs[i];
+    if(wseg>sg[0].length*5.6+6) el("text",{x:xs[i]+(wseg)/2,y:sy+12.5,class:sg[2],"font-size":"9","text-anchor":"middle"},c,sg[0]);
+  });
+  el("path",{d:"M"+X(19)+" "+(sy+sh)+"v10",class:"mut","stroke-width":"1"},c);
+  el("text",{x:X(19),y:sy+sh+21,class:"fmut","font-size":"9","text-anchor":"middle"},c,"fault cleared");
+  el("text",{x:px0,y:256,class:"fmut","font-size":"9"},c,"belt halted via PLC · motion verified · line resumes");
+
+  // Fig 4 — gear with measurements
+  var g=document.getElementById("gear");
+  var cx=150, cy=130, ro=92, ri=78, teeth=24, gd="";
+  for(var t=0;t<teeth;t++){
+    var a0=t/teeth*2*Math.PI, sp=2*Math.PI/teeth;
+    [[ri,a0],[ro,a0+sp*0.18],[ro,a0+sp*0.48],[ri,a0+sp*0.66]].forEach(function(p,j){
+      gd+=(t===0&&j===0?"M":"L")+(cx+p[0]*Math.cos(p[1])).toFixed(1)+" "+(cy+p[0]*Math.sin(p[1])).toFixed(1);});
+  }
+  el("path",{d:gd+"Z",fill:"none",class:"ink","stroke-width":"1.6"},g);
+  el("circle",{cx:cx,cy:cy,r:ri-10,fill:"none",class:"rl","stroke-width":"1","stroke-dasharray":"2 4"},g);
+  el("circle",{cx:cx,cy:cy,r:34,fill:"none",class:"ink","stroke-width":"1.6"},g);
+  for(var k=0;k<6;k++){el("rect",{x:cx+30,y:cy-3,width:7,height:6,class:"fink",transform:"rotate("+(k*60)+" "+cx+" "+cy+")"},g);}
+  el("path",{d:"M"+cx+" "+(cy-ro-8)+"V"+(cy+ro+8)+"M"+(cx-ro-8)+" "+cy+"H"+(cx+ro+8),class:"mut",fill:"none","stroke-width":"0.8","stroke-dasharray":"8 3 2 3"},g);
+  el("path",{d:"M"+(cx-ro)+" "+(cy+ro+18)+"H"+(cx+ro)+"M"+(cx-ro)+" "+(cy+ro+10)+"v16M"+(cx+ro)+" "+(cy+ro+10)+"v16",class:"an",fill:"none","stroke-width":"1.2"},g);
+  el("text",{x:cx,y:cy+ro+32,class:"fan","text-anchor":"middle"},g,"Ø OD measured");
+  var crx=cx+ro*Math.cos(-0.55)-6, cry=cy+ro*Math.sin(-0.55)+4;
+  el("path",{d:"M"+(crx-10)+" "+(cry+8)+"l6 -5 3 4 7 -9",class:"hi",fill:"none","stroke-width":"2"},g);
+  el("rect",{x:crx-18,y:cry-14,width:32,height:30,fill:"none",class:"hi","stroke-width":"1.6"},g);
+  el("path",{d:"M"+(crx+14)+" "+(cry-14)+"L268 40H352",class:"hi",fill:"none","stroke-width":"1"},g);
+  el("text",{x:270,y:34,class:"fhi"},g,"crack · flagged");
+  el("path",{d:"M"+(cx+ro*Math.cos(0.9))+" "+(cy+ro*Math.sin(0.9))+"L268 200H352",class:"mut",fill:"none","stroke-width":"1"},g);
+  el("text",{x:270,y:194,class:"fink"},g,"teeth: 24");
+  el("path",{d:"M"+(cx+37)+" "+cy+"L268 120H352",class:"mut",fill:"none","stroke-width":"1"},g);
+  el("text",{x:270,y:114,class:"fink"},g,"spline: 6");
+
+  // active nav
+  var links=[].slice.call(document.querySelectorAll(".bar nav a"));
+  var map={};links.forEach(function(l){map[l.getAttribute("href").slice(1)]=l;});
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){
+      var l=map[e.target.id]; if(!l) return;
+      if(e.isIntersecting){links.forEach(function(x){x.removeAttribute("aria-current")});l.setAttribute("aria-current","true");}
+    });},{rootMargin:"-45% 0px -50% 0px"});
+    Object.keys(map).forEach(function(id){var s=document.getElementById(id);if(s)io.observe(s);});
+  }
+
+  // copy email
+  var btn=document.getElementById("copy"), addr=document.getElementById("addr");
+  btn.addEventListener("click",function(){
+    function sel(){var r=document.createRange();r.selectNodeContents(addr);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent="Selected · press Ctrl+C";}
+    try{navigator.clipboard.writeText(addr.textContent).then(function(){btn.textContent="Copied";setTimeout(function(){btn.textContent="Copy email"},1800)},sel);}catch(e){sel();}
+  });
+})();
+</script>
+</body>
+</html>
